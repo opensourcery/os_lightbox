@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * OpenSourcery Lightbox module.
+ *
+ * Simple lightbox implementation - really an API for using fancybox with
+ * commonly needed extras.
+ *
+ * Custom code is required to use this module; @see os_lightbox_library().
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function os_lightbox_menu() {
+  return array(
+    'lightbox' => array(
+      'title' => 'Renders nodes for Ajax operations',
+      'page callback' => 'os_lightbox_lightbox_ajax_render',
+      'arguments' => array(1),
+      'access callback' => 'os_lightbox_lightbox_access',
+      'type' => MENU_CALLBACK,
+    ),
+  );
+}
+
+/**
+ * Access callback.
+ */
+function os_lightbox_lightbox_access() {
+  $system_path = drupal_get_normal_path($_GET['path']);
+  if ($node = menu_get_object('node', 1, $system_path)) {
+    $allowed_types = variable_get('os_lightbox_allowed_node_types', array());
+    return in_array($node->type, $allowed_types);
+  }
+  return FALSE;
+}
+
+/**
+ * Renders a node for lightbox ajax requests.
+ */
+function os_lightbox_lightbox_ajax_render() {
+  $system_path = drupal_get_normal_path($_GET['path']);
+  if ($node = menu_get_object('node', 1, $system_path)) {
+    $elements = node_view($node);
+    print drupal_render($elements);
+    exit();
+  }
+  drupal_not_found();
+}
+
+/**
+ * Implements hook_library().
+ *
+ * Allows a calling module to use drupal_add_library() or a render-array
+ * ['#attached']['library'] entry to invoke all the assets required to use the
+ * lightbox.
+ *
+ * This must be invoked (by either method above) on every page load that needs
+ * to support a.lightbox links.
+ */
+function os_lightbox_library() {
+  if (function_exists('libraries_get_path')) {
+    $fancybox_path = libraries_get_path('fancybox');
+  }
+  else {
+    $fancybox_path = 'profiles/' . drupal_get_profile() . '/libraries/fancybox';
+  }
+
+  return array(
+    'lightbox' => array(
+      'title' => 'OpenSourcery Lightbox',
+      'version' => '1.0.0',
+      'css' => array(
+        $fancybox_path . '/fancybox/jquery.fancybox-1.3.4.css' => array(),
+      ),
+      'js' => array(
+        drupal_get_path('module', 'os_lightbox') . '/os_lightbox.js' => array(),
+        $fancybox_path . '/fancybox/jquery.fancybox-1.3.4.js' => array(),
+      ),
+      'dependencies' => array(
+        // We're using BBQ for hashchange support.
+        array('system', 'jquery.bbq'),
+      ),
+    ),
+  );
+}

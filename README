@@ -1,0 +1,6 @@
+OpenSourcery Lightbox module for Drupal 7.
+
+Simple lightbox implementation - really an API for using fancybox with
+commonly needed extras.
+
+Custom code is required to use this module; see os_lightbox_library().

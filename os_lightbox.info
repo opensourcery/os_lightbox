@@ -1,0 +1,3 @@
+core = 7.x
+description = Provides a lightbox with "permalink" hash-urls using jQuery BBQ (built in to Drupal 7) and Fancybox (which must be downloaded separately).
+name = OpenSourcery Lightbox
